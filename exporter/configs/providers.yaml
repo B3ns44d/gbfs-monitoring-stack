@@ -1,0 +1,7 @@
+providers:
+  - name: "Buenos Aires"
+    auto_discovery_url: "https://buenosaires.publicbikesystem.net/ube/gbfs/v1/"
+  - name: "Ecobici"
+    auto_discovery_url: "https://buenosaires.publicbikesystem.net/ube/gbfs/v1/"
+  - name: "Bike Nordelta"
+    auto_discovery_url: "https://nordelta.publicbikesystem.net/ube/gbfs/v1/"
