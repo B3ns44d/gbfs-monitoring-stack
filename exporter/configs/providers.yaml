@@ -1,7 +1,7 @@
 providers:
-  - name: "Buenos Aires"
-    auto_discovery_url: "https://buenosaires.publicbikesystem.net/ube/gbfs/v1/"
-  - name: "Ecobici"
-    auto_discovery_url: "https://buenosaires.publicbikesystem.net/ube/gbfs/v1/"
-  - name: "Bike Nordelta"
-    auto_discovery_url: "https://nordelta.publicbikesystem.net/ube/gbfs/v1/"
+  - name: "Bicing"
+    auto_discovery_url: "https://barcelona-sp.publicbikesystem.net/customer/gbfs/v2/gbfs.json"
+  - name: "Belfast Bikes"
+    auto_discovery_url: "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_bu/gbfs.json"
+  - name: "Metropolradruhr Germany"
+    auto_discovery_url: "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_mr/gbfs.json"

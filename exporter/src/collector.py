@@ -20,7 +20,6 @@ class GBFSCollector:
         """This method is called by Prometheus to collect the metrics."""
         try:
             if not self.initialized:
-                self.initialize_fetchers()
                 self.initialized = True
 
             # Use ThreadPoolExecutor to fetch data concurrently from all providers
@@ -36,17 +35,11 @@ class GBFSCollector:
                     except Exception as exc:
                         logging.error(f"Provider {fetcher.provider_name} generated an exception: {exc}")
 
-            # Yield metrics that were updated
-            for metric in self.metrics_manager.collect():
-                yield metric
+            # Yield all metrics
+            yield from self.metrics_manager.collect()
 
         except Exception as e:
             logging.error(f"Error during data fetching: {e}")
-
-    def initialize_fetchers(self):
-        """Initialize all fetchers by retrieving their feed URLs."""
-        for fetcher in self.data_fetchers:
-            fetcher.initialize()  # Synchronous now
 
     def process_provider(self, fetcher: DataFetcher):
         """Fetches data for a single provider and updates the metrics."""
@@ -58,9 +51,9 @@ class GBFSCollector:
                 logging.warning(f"Skipping provider {fetcher.provider_name} due to missing data.")
                 return
 
-            provider_name = result['provider']
-            station_info_raw = result['station_information']
-            station_status_raw = result['station_status']
+            provider_name = result.get('provider', 'unknown_provider')
+            station_info_raw = result.get('station_information', {})
+            station_status_raw = result.get('station_status', {})
 
             # Process and update the metrics
             self.metrics_manager.update_metrics(provider_name, station_info_raw, station_status_raw)

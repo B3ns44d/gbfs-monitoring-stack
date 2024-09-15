@@ -1,5 +1,4 @@
 import logging
-
 from prometheus_client.core import GaugeMetricFamily
 
 from . import metrics_definitions as md
@@ -15,15 +14,11 @@ class MetricsManager:
         """Updates Prometheus metrics based on the fetched data."""
         logging.debug(f"Updating metrics for provider: {provider_name}")
 
-        # Clear previous samples to avoid accumulation
-        for metric in self.metrics.__dict__.values():
-            if isinstance(metric, GaugeMetricFamily):
-                metric.samples.clear()
-
         # Parse the raw data
         station_info_list = station_info_raw.get('data', {}).get('stations', [])
         station_status_list = station_status_raw.get('data', {}).get('stations', [])
 
+        # Initialize accumulators for overall metrics
         total_bikes_available = 0
         total_docks_available = 0
         total_bikes_disabled = 0
@@ -45,7 +40,8 @@ class MetricsManager:
 
             lat = info.get('lat', 0)
             lon = info.get('lon', 0)
-            labels = [provider_name, station_id, info['name'], str(lat), str(lon)]
+            station_name = info.get('name', 'unknown')
+            labels = [provider_name, station_id, station_name, str(lat), str(lon)]
 
             # Get status data
             num_bikes_available = status.get('num_bikes_available', 0)

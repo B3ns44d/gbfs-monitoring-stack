@@ -1,64 +1,68 @@
 import logging
-from threading import Lock
-from typing import Dict, Any
+import time
+from typing import Optional, Dict
 
 import requests
 
-from discovery import GBFSDiscovery
-
 
 class DataFetcher:
-    def __init__(self, provider_name: str, auto_discovery_url: str):
+    def __init__(self, provider_name: str, auto_discovery_url: str, cache_duration: int = 60):
         self.provider_name = provider_name
         self.auto_discovery_url = auto_discovery_url
-        self.feed_urls = {}
-        self.session = requests.Session()
-        self.initialized = False
-        self.lock = Lock()
+        self.cache_duration = cache_duration  # in seconds
+        self.cache = None
+        self.cache_timestamp = 0
 
-    def initialize(self):
-        """Initialize the fetcher by fetching the feed URLs."""
-        with self.lock:
-            if not self.initialized:
-                discovery = GBFSDiscovery(self.auto_discovery_url)
-                self.feed_urls = discovery.fetch_feed_urls(self.session)
+    def fetch_provider_data(self) -> Optional[Dict]:
+        """Fetches data from the GBFS provider's auto-discovery URL with caching."""
+        current_time = time.time()
+        if self.cache and (current_time - self.cache_timestamp) < self.cache_duration:
+            logging.info(f"Using cached data for {self.provider_name}")
+            return self.cache
 
-                if not self.feed_urls:
-                    logging.error(f"Skipping provider {self.provider_name} due to missing required feeds.")
-                    self.initialized = False
-                else:
-                    self.initialized = True
-
-    def fetch_feed_data(self, url: str) -> Dict[str, Any]:
         try:
-            response = self.session.get(url, timeout=5)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.Timeout:
-            logging.error(f"Timeout fetching data from {url}")
-            raise
-        except Exception as e:
-            logging.error(f"Error fetching data from {url}: {e}")
-            raise
+            response = requests.get(self.auto_discovery_url, timeout=10)
+            if response.status_code != 200:
+                logging.error(f"Failed to fetch auto-discovery for {self.provider_name}: HTTP {response.status_code}")
+                return None
 
-    def fetch_provider_data(self) -> Dict[str, Any]:
-        """Fetch station information and status data for the provider."""
-        if not self.initialized:
-            logging.warning(f"Provider {self.provider_name} is not initialized due to missing feeds.")
-            return {}
+            auto_discovery = response.json()
+            feeds = auto_discovery.get('data', {}).get('en', {}).get('feeds', [])
 
-        # Check if 'station_information' and 'station_status' feeds exist
-        if 'station_information' not in self.feed_urls or 'station_status' not in self.feed_urls:
-            logging.error(
-                f"Provider {self.provider_name} is missing required feeds ('station_information' or "
-                f"'station_status'). Skipping...")
-            return {}
+            # Extract required feeds
+            station_information_url = next((feed['url'] for feed in feeds if feed['name'] == 'station_information'),
+                                           None)
+            station_status_url = next((feed['url'] for feed in feeds if feed['name'] == 'station_status'), None)
 
-        station_info_data = self.fetch_feed_data(self.feed_urls['station_information'])
-        station_status_data = self.fetch_feed_data(self.feed_urls['station_status'])
+            if not station_information_url or not station_status_url:
+                logging.error(f"Missing required feeds for {self.provider_name}")
+                return None
 
-        return {
-            'provider': self.provider_name,
-            'station_information': station_info_data,
-            'station_status': station_status_data
-        }
+            # Fetch station information
+            station_info_response = requests.get(station_information_url, timeout=10)
+            if station_info_response.status_code != 200:
+                logging.error(
+                    f"Failed to fetch station information for {self.provider_name}: HTTP {station_info_response.status_code}")
+                return None
+
+            station_status_response = requests.get(station_status_url, timeout=10)
+            if station_status_response.status_code != 200:
+                logging.error(
+                    f"Failed to fetch station status for {self.provider_name}: HTTP {station_status_response.status_code}")
+                return None
+
+            data = {
+                'provider': self.provider_name,
+                'station_information': station_info_response.json(),
+                'station_status': station_status_response.json()
+            }
+
+            # Update cache
+            self.cache = data
+            self.cache_timestamp = current_time
+
+            return data
+
+        except requests.RequestException as e:
+            logging.error(f"Error fetching data for {self.provider_name}: {e}")
+            return None

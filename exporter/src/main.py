@@ -38,9 +38,10 @@ def main():
         logging.error(f"Failed to start HTTP server on port {args.port}: {e}")
         sys.exit(1)
 
+    import time
     try:
         while True:
-            pass
+            time.sleep(1)
     except KeyboardInterrupt:
         logging.info("Exporter is shutting down.")
 
