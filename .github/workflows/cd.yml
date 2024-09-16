@@ -1,0 +1,80 @@
+name: CD Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+  provision-infrastructure:
+    name: Provision AWS Infrastructure with Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Initialize Terraform
+        run: terraform init -upgrade
+        working-directory: infra/provisioning
+
+      - name: Terraform Plan
+        run: terraform plan -lock-timeout=600s -compact-warnings -out=plan.tfplan
+        working-directory: infra/provisioning
+
+      - name: Upload Terraform Plan Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan
+          path: infra/provisioning/plan.tfplan
+
+  apply-terraform:
+    name: Apply Terraform Plan
+    runs-on: ubuntu-latest
+    needs: provision-infrastructure
+    environment: dev
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Download Terraform Plan Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-plan
+
+      - name: Apply Terraform Plan
+        run: terraform apply "plan.tfplan"
+        working-directory: infra/provisioning
+
+      - name: Get EC2 instance public IP
+        id: get_ip
+        run: echo "::set-output name=ec2_public_ip::$(terraform output -raw ec2_public_ip)"
+        working-directory: infra/provisioning
+
+  deploy-stack:
+    name: Deploy Monitoring Stack with Ansible
+    runs-on: ubuntu-latest
+    needs: apply-terraform
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Install Ansible
+        run: sudo apt-get install -y ansible
+
+      - name: Create Ansible inventory
+        run: |
+          echo "[gbfs]" > inventory.ini
+          echo "gbfs-instance ansible_host=${{ steps.get_ip.outputs.ec2_public_ip }} ansible_user=ec2-user ansible_ssh_private_key_file=${{ secrets.SSH_PRIVATE_KEY }} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> inventory.ini
+
+      - name: Deploy GBFS Monitoring Stack
+        run: ansible-playbook playbooks/gbfs.yaml -i inventory.ini
+        working-directory: infra/deployment
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: false
