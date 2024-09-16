@@ -27,7 +27,7 @@ services:
         - --config.file=/etc/prometheus/prometheus.yml
         - --web.enable-admin-api
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infra/deployment/roles/gbfs_stack/templates/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
@@ -43,8 +43,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./infra/deployment/roles/gbfs_stack/templates/grafana/provisioning:/etc/grafana/provisioning
+      - ./infra/deployment/roles/gbfs_stack/templates/grafana/dashboards:/var/lib/grafana/dashboards
     ports:
       - "3000:3000"
     networks:
