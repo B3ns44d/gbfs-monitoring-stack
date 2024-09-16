@@ -5,7 +5,7 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket = var.bucket
-    key    = var.key
+    key    = "terraform.tfstate"
     region = var.region
   }
 }

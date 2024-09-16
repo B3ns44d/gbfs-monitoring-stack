@@ -16,7 +16,7 @@ module "ec2" {
   ami_id            = var.ami_id
   instance_type     = var.instance_type
   subnet_id         = module.network.subnet_id
-  security_group_id = module.security_group.security_group_id
+  security_group_name = module.security_group.security_group_name
   key_pair          = var.key_pair
   env_name          = var.env_name
   depends_on        = [
