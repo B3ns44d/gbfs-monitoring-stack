@@ -1,0 +1,53 @@
+---
+- name: Create directories for Docker Compose and monitoring stack
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /var/lib/compose/gbfs
+    - /var/lib/compose/gbfs/grafana
+    - /var/lib/compose/gbfs/grafana/dashboards
+    - /var/lib/compose/gbfs/grafana/provisioning
+    - /var/lib/compose/gbfs/grafana/provisioning/dashboards
+    - /var/lib/compose/gbfs/grafana/provisioning/datasources
+    - /var/lib/compose/gbfs/prometheus
+
+- name: Copy Docker Compose file
+  ansible.builtin.template:
+    src: "templates/docker-compose.yml.j2"
+    dest: /var/lib/compose/gbfs/docker-compose.yml
+    mode: '0755'
+
+- name: Copy Grafana dashboard
+  ansible.builtin.copy:
+    src: "templates/grafana/dashboards/gbfs_dashboard.json"
+    dest: "/var/lib/compose/gbfs/grafana/dashboards/gbfs_dashboard.json"
+    mode: '0755'
+
+- name: Copy Grafana provisioning files
+  ansible.builtin.copy:
+    src: "templates/grafana/provisioning/"
+    dest: "/var/lib/compose/gbfs/grafana/provisioning/"
+    mode: '0755'
+    remote_src: no
+
+- name: Copy Prometheus configuration file
+  ansible.builtin.copy:
+    src: "templates/prometheus/prometheus.yml"
+    dest: "/var/lib/compose/gbfs/prometheus/prometheus.yml"
+    mode: '0755'
+
+- name: Copy Exporter config file
+  ansible.builtin.copy:
+    src: "templates/exporter/config.yml"
+    dest: "/var/lib/compose/gbfs/exporter/config.yml"
+    mode: '0755'
+
+- name: Run Docker Compose to deploy Prometheus, Exporter, and Grafana
+  community.docker.docker_compose_v2:
+    project_src: "/var/lib/compose/gbfs/"
+    project_name: gbfs
+    state: present
+
+

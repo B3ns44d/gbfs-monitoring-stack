@@ -1,0 +1,9 @@
+role_path: "/var/lib/compose"
+exporter_image: "ghcr.io/b3ns44d/gbfs-prom-exporter:latest"
+exporter_port: 8000
+prometheus_image: "prom/prometheus:v2.45.0"
+prometheus_port: 9090
+grafana_image: "grafana/grafana:latest"
+grafana_admin_user: "admin"
+grafana_admin_password: "admin"
+grafana_port: 3000

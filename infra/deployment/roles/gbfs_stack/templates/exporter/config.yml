@@ -1,0 +1,7 @@
+providers:
+  - name: "Bicing"
+    auto_discovery_url: "https://barcelona-sp.publicbikesystem.net/customer/gbfs/v2/gbfs.json"
+  - name: "Belfast Bikes"
+    auto_discovery_url: "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_bu/gbfs.json"
+  - name: "Metropolradruhr Germany"
+    auto_discovery_url: "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_mr/gbfs.json"

@@ -1,0 +1,41 @@
+---
+- name: Update the package cache
+  ansible.builtin.yum:
+    name: "*"
+    state: latest
+
+- name: Install common dependencies
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - docker
+    - python3-pip
+
+- name: Ensure Docker is started and enabled
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Create Docker CLI plugins directory
+  ansible.builtin.file:
+    path: "/root/.docker/cli-plugins"
+    state: directory
+    mode: '0755'
+
+- name: Download Docker Compose v2 binary
+  ansible.builtin.get_url:
+    url: "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-linux-x86_64"
+    dest: "/root/.docker/cli-plugins/docker-compose"
+    mode: '0755'
+
+- name: Make Docker Compose plugin executable
+  ansible.builtin.file:
+    path: "/root/.docker/cli-plugins/docker-compose"
+    mode: '0755'
+    state: file
+
+- name: Verify Docker Compose plugin installation
+  ansible.builtin.command:
+    cmd: docker compose version

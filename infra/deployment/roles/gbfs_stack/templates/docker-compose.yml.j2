@@ -1,0 +1,59 @@
+services:
+  exporter:
+    image: {{ exporter_image }}
+    container_name: gbfs-exporter
+    restart: unless-stopped
+    command: >
+      --config /src/configs/providers.yaml
+      --port {{ exporter_port }}
+    volumes:
+      - /var/lib/compose/gbfs/exporter/config.yml:/src/configs/providers.yaml:ro
+    ports:
+      - "{{ exporter_port }}:{{ exporter_port }}"
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+  prometheus:
+    image: {{ prometheus_image }}
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-admin-api
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "{{ prometheus_port }}:{{ prometheus_port }}"
+    networks:
+      - monitoring
+
+  grafana:
+    image: {{ grafana_image }}
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER={{ grafana_admin_user }}
+      - GF_SECURITY_ADMIN_PASSWORD={{ grafana_admin_password }}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "{{ grafana_port }}:{{ grafana_port }}"
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
