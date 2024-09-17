@@ -1,10 +1,9 @@
 global:
-  scrape_interval: 1m
-  evaluation_interval: 30s
+  scrape_interval: 5m
 
 scrape_configs:
   - job_name: 'gbfs_exporter'
-    scrape_interval: 1m
-    scrape_timeout: 30s
+    scrape_interval: 5m
+    scrape_timeout: 1m
     static_configs:
       - targets: ['exporter:8000']
