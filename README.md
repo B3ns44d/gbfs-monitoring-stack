@@ -9,6 +9,7 @@
     - [Local Testing with Docker Compose](#local-setup-using-docker-compose)
     - [AWS Deployment](#deploying-to-aws)
 - [CI/CD Pipelines](#cicd-pipeline)
+- [Dashboard Preview](#dashboard-preview)
 
 ---
 
@@ -168,10 +169,6 @@ that I’ve used extensively in professional settings. This includes:
 
 Even though this setup may seem extensive for this particular task, it’s designed to handle future expansions and
 demonstrates modern DevOps practices in action.
-
----
-
-Here’s the updated **Running the Project** section for the README file:
 
 ---
 
@@ -359,3 +356,10 @@ pushing the image to the GitHub Container Registry.
         - Run Ansible playbook to deploy Prometheus, Grafana, and Exporter.
 
 For any changes to the `exporter` files, the CI pipeline automatically triggers the build and deployment processes.
+
+# Dashboard Preview
+
+![Dashboard Preview 1](./doc/dashboard-01.png)
+![Dashboard Preview 2](./doc/dashboard-02.png)
+![Dashboard Preview 3](./doc/dashboard-03.png)
+![Dashboard Preview 4](./doc/dashboard-04.png)
