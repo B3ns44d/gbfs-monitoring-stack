@@ -42,41 +42,47 @@ expose it as Prometheus metrics.
 
 ```mermaid
 flowchart TB
+    %% Define Exporter Components
     subgraph Exporter
-        Main[Main]
-        Collector[Collector]
-        DataFetcher[DataFetcher]
-        MetricsManager[MetricsManager]
-        GBFSDiscovery[GBFSDiscovery]
-        MetricsDefinitions[Metrics Definitions]
-        ExposeMetrics[Expose /metrics Endpoint]
+        Main["Main"]
+        Collector["Collector"]
+        DataFetcher["DataFetcher"]
+        MetricsManager["MetricsManager"]
+        ExposeMetrics["Expose /metrics Endpoint"]
+        GBFSDiscovery["GBFSDiscovery"]
+        GBFSProviders["GBFS Providers"]
+        MetricsDefinitions["Metrics Definitions"]
+        
         Main --> Collector
         Collector --> DataFetcher
         Collector --> MetricsManager
-        DataFetcher --> GBFSDiscovery
-        DataFetcher --> GBFSProviders[GBFS Providers]
-        MetricsManager --> MetricsDefinitions
         Collector --> ExposeMetrics
+        DataFetcher --> GBFSDiscovery
+        DataFetcher --> GBFSProviders
+        MetricsManager --> MetricsDefinitions
     end
-
-    subgraph MetricsManager_Processes
-        UpdateMetrics[Update Station Metrics]
-        HandleMissingData[Handle Missing Data]
-        AggregateData[Aggregate Provider Data]
-    end
-
+    
+    %% Define DataFetcher Processes
     subgraph DataFetcher_Processes
-        RequestSession[Request Session]
-        FetchStationInfo[Fetch Station Information]
-        FetchStationStatus[Fetch Station Status]
+        RequestSession["Request Session"]
+        FetchStationInfo["Fetch Station Information"]
+        FetchStationStatus["Fetch Station Status"]
+        
+        DataFetcher --> RequestSession
+        RequestSession --> FetchStationInfo
+        FetchStationInfo --> FetchStationStatus
     end
-
-    MetricsManager --> UpdateMetrics
-    MetricsManager --> HandleMissingData
-    MetricsManager --> AggregateData
-    DataFetcher --> RequestSession
-    DataFetcher --> FetchStationInfo
-    DataFetcher --> FetchStationStatus
+    
+    %% Define MetricsManager Processes
+    subgraph MetricsManager_Processes
+        UpdateMetrics["Update Station Metrics"]
+        HandleMissingData["Handle Missing Data"]
+        AggregateData["Aggregate Provider Data"]
+        
+        MetricsManager --> UpdateMetrics
+        UpdateMetrics --> HandleMissingData
+        HandleMissingData --> AggregateData
+    end
 ```
 
 ### Flow Description
