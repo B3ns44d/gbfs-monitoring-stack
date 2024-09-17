@@ -95,6 +95,7 @@ deployment. Additionally, the entire process is streamlined using **GitHub Actio
 - GitHub Actions also ensure that the infrastructure and deployment are kept up to date, making the entire process of
   deploying and maintaining the monitoring stack seamless and automated.
 
+![Overview of the Setup](./doc/gbfs-diagram.drawio.png)
 ---
 
 ### **Infrastructure Choices**
