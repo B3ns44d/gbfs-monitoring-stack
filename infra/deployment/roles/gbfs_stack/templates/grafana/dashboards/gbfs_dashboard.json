@@ -19,7 +19,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
   "links": [],
   "panels": [
     {
@@ -915,7 +914,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1009,7 +1008,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1127,7 +1126,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1605,7 +1604,7 @@
       "type": "barchart"
     }
   ],
-  "refresh": "30s",
+  "refresh": "",
   "schemaVersion": 39,
   "tags": [
     "GBFS",
@@ -1821,13 +1820,13 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "GBFS Bikeshare Monitoring Dashboards",
   "uid": "gbfs_bikeshare_dashboards",
-  "version": 4,
+  "version": 2,
   "weekStart": ""
 }
